@@ -108,16 +108,15 @@ public class App {
 				try {
 					Document doc = Jsoup.connect(txtUrl.getText()).get();
 					
-					Elements body = doc.select("body");
+					Elements img = doc.select("img");
 					
-					for(int i = 0; i < body.size(); i++){	
-						System.out.println(body.get(i).select("img").attr("src"));	
+					for(int i = 0; i < img.size(); i++){	
+						listImg.addElement(img.get(i).attr("src"));	
 					}
 					
 					txtUrl.setText("");
 					
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}	
 			}
