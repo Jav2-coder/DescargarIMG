@@ -4,18 +4,27 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
 public class App {
 
-	DefaultListModel llistaImg = new DefaultListModel();
+	private DefaultListModel<String> listImg = new DefaultListModel<>();
 	
 	private JFrame frame;
 
@@ -46,6 +55,7 @@ public class App {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 500, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,7 +69,7 @@ public class App {
 		g.fill = GridBagConstraints.BOTH;
 
 		g.weightx = 0.5;
-		g.weighty = 0.05;
+		g.weighty = 0.01;
 
 		g.gridwidth = 1;
 		g.gridheight = 1;
@@ -82,7 +92,7 @@ public class App {
 		g.fill = GridBagConstraints.BOTH;
 
 		g.weightx = 0.5;
-		g.weighty = 0.08;
+		g.weighty = 0.1;
 
 		g.gridwidth = 1;
 		g.gridheight = 1;
@@ -91,11 +101,33 @@ public class App {
 		g.gridy = 1;
 		frame.getContentPane().add(btnDownload, g);
 		
+		btnDownload.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent arg0) {
+				
+				try {
+					Document doc = Jsoup.connect(txtUrl.getText()).get();
+					
+					Elements body = doc.select("body");
+					
+					for(int i = 0; i < body.size(); i++){	
+						System.out.println(body.get(i).select("img").attr("src"));	
+					}
+					
+					txtUrl.setText("");
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+			}
+		});
+		
 		JLabel lblText = new JLabel("Fitxers descarregats:");
 		g.fill = GridBagConstraints.BOTH;
 
 		g.weightx = 0.5;
-		g.weighty = 0.05;
+		g.weighty = 0.01;
 
 		g.gridwidth = 1;
 		g.gridheight = 1;
@@ -104,10 +136,12 @@ public class App {
 		g.gridy = 2;
 		frame.getContentPane().add(lblText, g);
 		
-		JLabel lblImatges = new JLabel("");
-		lblImatges.setBackground(Color.WHITE);
-		lblImatges.setBorder(BorderFactory.createLineBorder(Color.black));
-		lblImatges.setOpaque(true);
+		JList<String> listIMG = new JList<>(listImg);
+		
+		JScrollPane listScroll = new JScrollPane(listIMG);
+		listScroll.setBackground(Color.WHITE);
+		listScroll.setBorder(BorderFactory.createLineBorder(Color.black));
+		
 		g.fill = GridBagConstraints.BOTH;
 
 		g.weightx = 0.5;
@@ -118,7 +152,8 @@ public class App {
 
 		g.gridx = 1;
 		g.gridy = 3;
-		frame.getContentPane().add(lblImatges, g);
+		
+		frame.getContentPane().add(listScroll, g);
 
 	}
 }
