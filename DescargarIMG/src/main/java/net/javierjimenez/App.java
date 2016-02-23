@@ -130,14 +130,12 @@ public class App {
 						String url = txtUrl.getText();
 
 						String srcImg = img.get(i).attr("src");
-						
+
 						String[] nomsImg = srcImg.split("/");
 						String nomImg = nomsImg[nomsImg.length - 1];
 
 						linkImg = crearLink(url, srcImg);
 
-						System.out.println(linkImg);
-						
 						String directori = contenedor + "/" + nomImg;
 
 						URL conn = new URL(linkImg);
@@ -146,7 +144,7 @@ public class App {
 
 						guardaImatge(conn, directori);
 
-						//System.out.println("Imagen " + nomImg + " añadida.");
+						System.out.println("Imagen " + nomImg + " añadida.");
 					}
 
 					System.out.println("Descarga finalizada!");
@@ -195,15 +193,21 @@ public class App {
 
 	private String crearLink(String u, String src) {
 
-		if (!src.contains(u)) {
+		if (!src.contains("http")) {
 
-			if (u.endsWith("/")) {
+			if (u.endsWith("/") && src.startsWith("/")) {
 
-				return u.substring( u.lastIndexOf('/')+1, u.length() );
+				return u.substring(0, u.lastIndexOf('/')) + src;
+
+			} else if (!u.endsWith("/") && !src.startsWith("/")) {
+
+				return u + "/" + src;
 
 			} else {
+
 				return u + src;
 			}
+
 		} else {
 			return src;
 		}
