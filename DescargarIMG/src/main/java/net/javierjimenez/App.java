@@ -27,15 +27,35 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+/**
+ * 
+ * @author alumne1daw
+ *
+ */
 public class App {
 
+	/**
+	 * Objeto DefaultListModel donde añadiremos el nombre de las imagenes que
+	 * vamos a descargar desde una URL.
+	 */
 	private DefaultListModel<String> listImg = new DefaultListModel<>();
 
+	/**
+	 * Objeto principal del programa que controla la ventana emergente.
+	 */
 	private JFrame frame;
 
-	String linkImg = "";
+	/**
+	 * Variable String que contendrá los nombres de imagenes que vamos a mostrar
+	 * en el JList.
+	 */
+	private String linkImg = "";
 
-	static File contenedor = new File("Img");
+	/**
+	 * Objeto de tipo File que generara un directorio para almacenar en el las
+	 * imagenes que vayamos a descargar desde la URL.
+	 */
+	private static File contenedor = new File("Img");
 
 	/**
 	 * Launch the application.
@@ -54,21 +74,23 @@ public class App {
 	}
 
 	/**
-	 * Create the application.
+	 * Controlador encargado de crear la aplicación.
 	 */
 	public App() {
 		initialize();
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Metodo encargado de iniciar el contenido del frame.
 	 */
 	private void initialize() {
 
+		/*
+		 * Si no existe el contenedor, genera uno en la raiz de donde se ejecute
+		 * el programa
+		 */
 		if (!contenedor.exists()) {
-
 			contenedor.mkdir();
-
 		}
 
 		frame = new JFrame();
@@ -93,6 +115,10 @@ public class App {
 		g.gridy = 0;
 		frame.getContentPane().add(lblUrl, g);
 
+		/*
+		 * Objeto JTextField donde añadiremos una URL valida (https:// ... )
+		 * para descargar las imagenes que esta contiene
+		 */
 		JTextField txtUrl = new JTextField();
 		g.fill = GridBagConstraints.BOTH;
 
@@ -103,6 +129,9 @@ public class App {
 		g.gridy = 0;
 		frame.getContentPane().add(txtUrl, g);
 
+		/*
+		 * Objeto JButton que inicia la descarga de las imagenes.
+		 */
 		JButton btnDownload = new JButton("Descarregar");
 		g.fill = GridBagConstraints.BOTH;
 
@@ -121,8 +150,14 @@ public class App {
 			public void actionPerformed(ActionEvent arg0) {
 
 				try {
+
+					/*
+					 * A traves de Jsoup conectamos con la URL que hemos
+					 * escrito.
+					 */
 					Document doc = Jsoup.connect(txtUrl.getText()).get();
 
+					// Seleccionamos todas las etiquetas img del HTML.
 					Elements img = doc.select("img");
 
 					for (int i = 0; i < img.size(); i++) {
@@ -134,20 +169,35 @@ public class App {
 						String[] nomsImg = srcImg.split("/");
 						String nomImg = nomsImg[nomsImg.length - 1];
 
-						linkImg = crearLink(url, srcImg);
+						/*
+						 * Aqui deshecharemos los src que no nos serviran a la
+						 * hora de descargar imagenes, como aquellos que no
+						 * tienen un formato de imagen (.jpeg, .png, .gif ...) o
+						 * redirecciones.
+						 */
+						if (srcImg.contains(".")) {
 
-						String directori = contenedor + "/" + nomImg;
+							String IMGformat = srcImg.substring(srcImg.lastIndexOf('.') + 1, srcImg.length());
 
-						URL conn = new URL(linkImg);
+							if (IMGformat.length() < 5) {
 
-						listImg.addElement(nomImg);
+								linkImg = crearLink(url, srcImg);
 
-						guardaImatge(conn, directori);
+								String directori = contenedor + "/" + nomImg;
 
-						System.out.println("Imagen " + nomImg + " añadida.");
+								URL conn = new URL(linkImg);
+
+								listImg.addElement(nomImg);
+
+								guardaImatge(conn, directori);
+
+								System.out.println("Imagen " + nomImg + " añadida");
+							}
+						}
 					}
 
 					System.out.println("Descarga finalizada!");
+					System.out.println();
 
 					txtUrl.setText("");
 
@@ -170,8 +220,17 @@ public class App {
 		g.gridy = 2;
 		frame.getContentPane().add(lblText, g);
 
+		/*
+		 * Objeto JList que listará los nombres de imagenes que hemos añadido
+		 * dentro de listImg
+		 */
 		JList<String> listIMG = new JList<>(listImg);
 
+		/*
+		 * Objeto JScrollPane encargado de mostrar en la ventana emergente el
+		 * listado de strings que se encuentran dentro del JList que hemos
+		 * creado antes.
+		 */
 		JScrollPane listScroll = new JScrollPane(listIMG);
 		listScroll.setBackground(Color.WHITE);
 		listScroll.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -191,42 +250,48 @@ public class App {
 
 	}
 
+	/**
+	 * Metodo encargado de generar enlaces validos para poder descargar las
+	 * imagenes correctamente.
+	 * 
+	 * @param u Variable String que contiene la URL que hemos escrito.
+	 * @param src variable String que contiene el src de las etiquetas img.
+	 * @return 
+	 */
 	private String crearLink(String u, String src) {
-
 		if (!src.contains("http")) {
-
 			if (u.endsWith("/") && src.startsWith("/")) {
-
 				return u.substring(0, u.lastIndexOf('/')) + src;
-
 			} else if (!u.endsWith("/") && !src.startsWith("/")) {
-
 				return u + "/" + src;
-
 			} else {
-
 				return u + src;
 			}
-
 		} else {
 			return src;
 		}
 	}
 
+	/**
+	 * Metodo encargado de descargar y guardar las imagenes
+	 * que se encuentran dentro de la URL que hemos escrito
+	 * y añadirlas en el directorio que le indiquemos.
+	 * 
+	 * @param url Objeto URL encargado de la conexion con la url que hemos escrito.
+	 * @param dir Variable String que contiene el directorio donde 
+	 * descargara y nombre del fichero que vamos a descargar.
+	 * 
+	 * @throws IOException
+	 */
 	public static void guardaImatge(URL url, String dir) throws IOException {
-
 		InputStream is = url.openStream();
 		OutputStream os = new FileOutputStream(new File(dir));
-
 		byte[] b = new byte[2048];
 		int length;
-
 		while ((length = is.read(b)) != -1) {
 			os.write(b, 0, length);
 		}
-
 		is.close();
 		os.close();
 	}
-
 }
